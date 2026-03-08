@@ -8,12 +8,12 @@ from functools import wraps
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = 'smartlearn_secret_key_2024'
 
-# On Vercel, use /tmp (the only writable directory in serverless env).
-# Locally it falls back to backend/database.db for development.
+# On Vercel serverless, only /tmp is writable.
+# On Render (and local), use the normal backend/ path for persistence.
 if os.environ.get('VERCEL'):
     DB_PATH = '/tmp/database.db'
 else:
-    DB_PATH = os.path.join(os.path.dirname(__file__), 'backend', 'database.db')
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend', 'database.db')
 
 # ─────────────────────────────────────────────
 # Database Helpers
