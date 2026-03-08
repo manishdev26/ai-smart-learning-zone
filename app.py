@@ -8,7 +8,12 @@ from functools import wraps
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = 'smartlearn_secret_key_2024'
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'backend', 'database.db')
+# On Vercel, use /tmp (the only writable directory in serverless env).
+# Locally it falls back to backend/database.db for development.
+if os.environ.get('VERCEL'):
+    DB_PATH = '/tmp/database.db'
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), 'backend', 'database.db')
 
 # ─────────────────────────────────────────────
 # Database Helpers
@@ -526,6 +531,9 @@ def admin_delete_course(course_id):
     flash('Course deleted.', 'warning')
     return redirect(url_for('admin_panel'))
 
+# Initialize DB at module level so Vercel serverless cold starts work correctly.
+# init_db() is safe to call multiple times (uses CREATE TABLE IF NOT EXISTS).
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
