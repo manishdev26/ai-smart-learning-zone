@@ -318,6 +318,11 @@ def login():
             session['user_id'] = user['id']
             session['user_name'] = user['name']
             session['is_admin'] = bool(user['is_admin'])
+            # Store full profile in session so dashboard works across Vercel serverless instances
+            session['user_email'] = user['email']
+            session['user_education'] = user['education']
+            session['user_interests'] = user['interests']
+            session['user_skill_level'] = user['skill_level']
             flash(f'Welcome back, {user["name"]}!', 'success')
             if user['is_admin']:
                 return redirect(url_for('admin_panel'))
@@ -337,6 +342,20 @@ def logout():
 def dashboard():
     conn = get_db()
     user = conn.execute('SELECT * FROM users WHERE id=?', (session['user_id'],)).fetchone()
+
+    # Vercel serverless: if DB instance doesn't have this user (cross-instance),
+    # fall back to session-stored profile data so dashboard never crashes.
+    if user is None:
+        user = {
+            'id': session.get('user_id'),
+            'name': session.get('user_name', 'User'),
+            'email': session.get('user_email', ''),
+            'education': session.get('user_education', 'Undergraduate'),
+            'interests': session.get('user_interests', ''),
+            'skill_level': session.get('user_skill_level', 'Beginner'),
+            'is_admin': session.get('is_admin', False),
+        }
+
     quiz_result = conn.execute('SELECT * FROM quiz_results WHERE user_id=? ORDER BY taken_at DESC LIMIT 1',
                                (session['user_id'],)).fetchone()
     progress = conn.execute('''SELECT up.*, c.title FROM user_progress up
@@ -348,7 +367,9 @@ def dashboard():
 
     score = quiz_result['score'] if quiz_result else None
     total_q = quiz_result['total'] if quiz_result else None
-    recommendations = get_recommendations(user['interests'], user['skill_level'], score, total_q)
+    interests = user['interests'] if isinstance(user, dict) else user['interests']
+    skill_level = user['skill_level'] if isinstance(user, dict) else user['skill_level']
+    recommendations = get_recommendations(interests, skill_level, score, total_q)
     conn.close()
     return render_template('dashboard.html', user=user, quiz_result=quiz_result,
                            recommendations=recommendations, progress=progress,
@@ -371,6 +392,17 @@ def profile():
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('profile'))
     user = conn.execute('SELECT * FROM users WHERE id=?', (session['user_id'],)).fetchone()
+    # Vercel serverless fallback: use session data if DB user not found on this instance
+    if user is None:
+        user = {
+            'id': session.get('user_id'),
+            'name': session.get('user_name', 'User'),
+            'email': session.get('user_email', ''),
+            'education': session.get('user_education', 'Undergraduate'),
+            'interests': session.get('user_interests', ''),
+            'skill_level': session.get('user_skill_level', 'Beginner'),
+            'is_admin': session.get('is_admin', False),
+        }
     conn.close()
     return render_template('profile.html', user=user)
 
