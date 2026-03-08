@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block body %}
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('index') }}"><i class="fas fa-brain"></i> SmartLearn</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="fas fa-bars" style="color:var(--text-primary)"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link active" href="{{ url_for('courses') }}">Courses</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('resources') }}">Resources</a></li>
+        {% if session.user_id %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link btn-nav-primary ms-2" href="{{ url_for('logout') }}">Logout</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+          <li class="nav-item"><a class="nav-link btn-nav-primary ms-2" href="{{ url_for('signup') }}">Sign Up</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding:3rem 1rem;">
+  <div class="page-header">
+    <h1 class="page-title">📚 All Courses</h1>
+    <p class="page-sub">Browse our complete course library</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+    <div>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">Filter by Category</p>
+      <div class="filter-chips">
+        <a href="{{ url_for('courses') }}" class="chip {{ 'active-chip' if not selected_cat else '' }}">All</a>
+        {% for cat in categories %}
+          <a href="{{ url_for('courses', category=cat[0]) }}" class="chip {{ 'active-chip' if selected_cat == cat[0] else '' }}">{{ cat[0] }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">Filter by Level</p>
+      <div class="filter-chips">
+        <a href="{{ url_for('courses', category=selected_cat) }}" class="chip {{ 'active-chip' if not selected_diff else '' }}">All Levels</a>
+        {% for diff in ['Beginner', 'Intermediate', 'Advanced'] %}
+          <a href="{{ url_for('courses', category=selected_cat, difficulty=diff) }}" class="chip {{ 'active-chip' if selected_diff == diff else '' }}">{{ diff }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if courses %}
+  <div class="row g-4 fade-in">
+    {% for course in courses %}
+    <div class="col-lg-4 col-md-6">
+      <a href="{{ url_for('course_detail', course_id=course.id) }}" style="text-decoration:none;">
+        <div class="course-card" style="height:100%">
+          <div class="course-card-header">
+            <span class="course-badge badge-{{ course.category|lower }}">{{ course.category }}</span>
+            <span class="course-badge diff-{{ course.difficulty|lower }} ms-1">{{ course.difficulty }}</span>
+            <div class="course-title mt-2">{{ course.title }}</div>
+          </div>
+          <div class="course-card-body">
+            <p class="course-desc">{{ course.description }}</p>
+            <div class="d-flex gap-2">
+              {% if course.video_link %}<span class="tag" style="font-size:0.72rem">📹 Video</span>{% endif %}
+              {% if course.article_link %}<span class="tag" style="font-size:0.72rem">📄 Article</span>{% endif %}
+              {% if course.pdf_link %}<span class="tag" style="font-size:0.72rem">📑 PDF</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <p>No courses found for the selected filters.</p>
+    <a href="{{ url_for('courses') }}" class="btn-primary-custom" style="font-size:0.85rem">Clear Filters</a>
+  </div>
+  {% endif %}
+</div>
+
+<footer>
+  <div class="container">
+    <p><strong class="gradient-text">SmartLearn</strong> &mdash; AI Based Smart Learning Recommendation System</p>
+  </div>
+</footer>
+{% endblock %}

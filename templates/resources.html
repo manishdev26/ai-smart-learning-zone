@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Learning Resources{% endblock %}
+{% block body %}
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('index') }}"><i class="fas fa-brain"></i> SmartLearn</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="fas fa-bars" style="color:var(--text-primary)"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('courses') }}">Courses</a></li>
+        <li class="nav-item"><a class="nav-link active" href="{{ url_for('resources') }}">Resources</a></li>
+        {% if session.user_id %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link btn-nav-primary ms-2" href="{{ url_for('logout') }}">Logout</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+          <li class="nav-item"><a class="nav-link btn-nav-primary ms-2" href="{{ url_for('signup') }}">Sign Up</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding:3rem 1rem;">
+  <div class="page-header">
+    <h1 class="page-title">🔗 Learning Resources</h1>
+    <p class="page-sub">Videos, articles, and materials from all courses</p>
+  </div>
+
+  <!-- Videos -->
+  <div class="mb-5 fade-in">
+    <h4 style="font-weight:700;margin-bottom:1.2rem;">🎬 Video Tutorials</h4>
+    <div class="row g-3">
+      {% for course in courses if course.video_link %}
+      <div class="col-lg-4 col-md-6">
+        <a href="{{ course.video_link }}" target="_blank" style="text-decoration:none;">
+          <div class="card-custom" style="display:flex;gap:1rem;align-items:center;padding:1rem 1.2rem;">
+            <div style="font-size:1.8rem;flex-shrink:0;">📹</div>
+            <div>
+              <div style="font-weight:600;font-size:0.88rem;line-height:1.4;margin-bottom:0.3rem;">{{ course.title }}</div>
+              <div class="d-flex gap-1">
+                <span class="course-badge badge-{{ course.category|lower }}" style="font-size:0.7rem">{{ course.category }}</span>
+                <span class="course-badge diff-{{ course.difficulty|lower }}" style="font-size:0.7rem">{{ course.difficulty }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Articles -->
+  <div class="mb-5 fade-in">
+    <h4 style="font-weight:700;margin-bottom:1.2rem;">📄 Articles & Documentation</h4>
+    <div class="row g-3">
+      {% for course in courses if course.article_link %}
+      <div class="col-lg-4 col-md-6">
+        <a href="{{ course.article_link }}" target="_blank" style="text-decoration:none;">
+          <div class="card-custom" style="display:flex;gap:1rem;align-items:center;padding:1rem 1.2rem;background:rgba(0,212,160,0.04);border-color:rgba(0,212,160,0.15);">
+            <div style="font-size:1.8rem;flex-shrink:0;">📄</div>
+            <div>
+              <div style="font-weight:600;font-size:0.88rem;line-height:1.4;margin-bottom:0.3rem;">{{ course.title }}</div>
+              <div class="d-flex gap-1">
+                <span class="course-badge badge-{{ course.category|lower }}" style="font-size:0.7rem">{{ course.category }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- External quick links -->
+  <div class="fade-in">
+    <h4 style="font-weight:700;margin-bottom:1.2rem;">⭐ Popular Learning Platforms</h4>
+    <div class="row g-3">
+      {% set platforms = [
+        ('🎓', 'Coursera', 'World-class courses from top universities', 'https://www.coursera.org'),
+        ('📘', 'edX', 'University-level learning online', 'https://www.edx.org'),
+        ('🎯', 'Kaggle Learn', 'Hands-on data science courses', 'https://www.kaggle.com/learn'),
+        ('🐍', 'Real Python', 'Python tutorials and best practices', 'https://realpython.com'),
+        ('💻', 'freeCodeCamp', 'Free coding bootcamp curriculum', 'https://www.freecodecamp.org'),
+        ('📊', 'Khan Academy', 'Free math and science resources', 'https://www.khanacademy.org'),
+      ] %}
+      {% for icon, name, desc, url in platforms %}
+      <div class="col-md-4 col-sm-6">
+        <a href="{{ url }}" target="_blank" style="text-decoration:none;">
+          <div class="card-custom" style="text-align:center;padding:1.5rem;">
+            <div style="font-size:2rem;margin-bottom:0.6rem;">{{ icon }}</div>
+            <div style="font-weight:700;margin-bottom:0.3rem;">{{ name }}</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary)">{{ desc }}</div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<footer><div class="container"><p><strong class="gradient-text">SmartLearn</strong> &mdash; AI Based Smart Learning Recommendation System</p></div></footer>
+{% endblock %}

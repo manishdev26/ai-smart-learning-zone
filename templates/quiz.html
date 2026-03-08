@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Skill Assessment Quiz{% endblock %}
+{% block body %}
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="{{ url_for('index') }}" class="sidebar-brand"><i class="fas fa-brain me-2"></i>SmartLearn</a>
+    <div class="sidebar-section-title">Main Menu</div>
+    <a href="{{ url_for('dashboard') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+    <a href="{{ url_for('profile') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-user"></i></span> My Profile</a>
+    <a href="{{ url_for('quiz') }}" class="sidebar-link active"><span class="sidebar-icon"><i class="fas fa-question-circle"></i></span> Take Quiz</a>
+    <div class="sidebar-section-title">Learning</div>
+    <a href="{{ url_for('courses') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-book"></i></span> All Courses</a>
+    <a href="{{ url_for('resources') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-link"></i></span> Resources</a>
+    <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border);">
+      <a href="{{ url_for('logout') }}" class="sidebar-link" style="color:var(--accent)"><span class="sidebar-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">🧠 Skill Assessment Quiz</h1>
+      <p class="page-sub">Test your knowledge across Python, Logic, and Mathematics</p>
+    </div>
+
+    <div class="quiz-wrapper fade-in">
+      <!-- Timer & info bar -->
+      <div class="card-custom mb-4" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding:1rem 1.5rem;">
+        <div style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+          <div><span style="font-size:0.8rem;color:var(--text-secondary)">TOTAL QUESTIONS</span><br><strong>{{ questions|length }}</strong></div>
+          <div><span style="font-size:0.8rem;color:var(--text-secondary)">TOPICS</span><br><strong>Python · Logic · Math</strong></div>
+          <div><span style="font-size:0.8rem;color:var(--text-secondary)">FORMAT</span><br><strong>Multiple Choice</strong></div>
+        </div>
+        <div id="timer" style="font-size:1.4rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">⏱ <span id="timerCount">00:00</span></div>
+      </div>
+
+      <form method="POST" action="{{ url_for('quiz') }}" id="quizForm">
+        {% set topic_order = ['Python', 'Logic', 'Math'] %}
+        {% set current_topic = namespace(val='') %}
+        {% for q in questions %}
+          {% if q.topic != current_topic.val %}
+            {% if not loop.first %}</div>{% endif %}
+            {% set current_topic.val = q.topic %}
+            <div style="margin-bottom:0.5rem;margin-top:1.5rem;">
+              <span class="tag" style="font-size:0.8rem;padding:0.3rem 0.9rem;">
+                {% if q.topic == 'Python' %}🐍{% elif q.topic == 'Logic' %}🔧{% else %}📐{% endif %}
+                {{ q.topic }} Questions
+              </span>
+            </div>
+            <div>
+          {% endif %}
+          <div class="question-card">
+            <div class="question-num">Question {{ loop.index }} of {{ questions|length }}</div>
+            <div class="question-text">{{ q.question }}</div>
+            <div>
+              {% for opt_key, opt_label in [('A', q.option_a), ('B', q.option_b), ('C', q.option_c), ('D', q.option_d)] %}
+              <label class="option-label">
+                <input type="radio" name="q{{ q.id }}" value="{{ opt_key }}" required>
+                <span style="min-width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--primary-light)">{{ opt_key }}</span>
+                <span style="font-size:0.88rem;">{{ opt_label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+
+        <div class="card-custom" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <p style="margin:0;font-size:0.85rem;color:var(--text-secondary)">
+            <i class="fas fa-info-circle me-1"></i> Answer all questions before submitting
+          </p>
+          <button type="submit" class="btn-primary-custom" style="padding:0.7rem 2rem;font-size:1rem;">
+            <i class="fas fa-paper-plane me-2"></i>Submit Quiz
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  let seconds = 0;
+  const timerEl = document.getElementById('timerCount');
+  setInterval(() => {
+    seconds++;
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    timerEl.textContent = m + ':' + s;
+  }, 1000);
+</script>
+{% endblock %}

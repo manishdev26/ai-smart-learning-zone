@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+{% block body %}
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('index') }}"><i class="fas fa-brain"></i> SmartLearn</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('courses') }}">← Back to Courses</a></li>
+        {% if session.user_id %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link btn-nav-primary ms-2" href="{{ url_for('logout') }}">Logout</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding:3rem 1rem;max-width:860px;">
+  <div class="fade-in">
+    <!-- Header -->
+    <div class="card-custom mb-4" style="background:linear-gradient(135deg,rgba(108,99,255,0.12) 0%,rgba(0,212,160,0.06) 100%);">
+      <div class="d-flex gap-2 mb-2">
+        <span class="course-badge badge-{{ course.category|lower }}">{{ course.category }}</span>
+        <span class="course-badge diff-{{ course.difficulty|lower }}">{{ course.difficulty }}</span>
+      </div>
+      <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.8rem;">{{ course.title }}</h1>
+      <p style="color:var(--text-secondary);line-height:1.8;font-size:0.95rem;">{{ course.description }}</p>
+
+      {% if session.user_id %}
+        {% if enrolled %}
+          <div class="d-flex gap-3 mt-3 flex-wrap">
+            <span class="btn-secondary-custom" style="cursor:default;opacity:0.7">✅ Enrolled</span>
+            <a href="{{ url_for('complete_course', course_id=course.id) }}" class="btn-primary-custom">
+              <i class="fas fa-check me-1"></i>Mark as Completed
+            </a>
+          </div>
+        {% else %}
+          <a href="{{ url_for('enroll', course_id=course.id) }}" class="btn-primary-custom mt-3">
+            <i class="fas fa-plus-circle me-2"></i>Enroll in This Course
+          </a>
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('login') }}" class="btn-primary-custom mt-3">Login to Enroll</a>
+      {% endif %}
+    </div>
+
+    <!-- Resources -->
+    <div class="card-custom">
+      <h4 style="font-weight:700;margin-bottom:1.5rem;"><i class="fas fa-link me-2" style="color:var(--primary)"></i>Learning Resources</h4>
+      <div class="row g-3">
+        {% if course.video_link %}
+        <div class="col-md-4">
+          <a href="{{ course.video_link }}" target="_blank" style="text-decoration:none;">
+            <div class="card-custom" style="background:rgba(255,0,0,0.05);border-color:rgba(255,0,0,0.15);text-align:center;padding:1.5rem;">
+              <div style="font-size:2.5rem;margin-bottom:0.8rem;">🎬</div>
+              <div style="font-weight:700;margin-bottom:0.3rem;">Video Tutorial</div>
+              <div style="font-size:0.8rem;color:var(--text-secondary)">Watch on YouTube</div>
+            </div>
+          </a>
+        </div>
+        {% endif %}
+        {% if course.article_link %}
+        <div class="col-md-4">
+          <a href="{{ course.article_link }}" target="_blank" style="text-decoration:none;">
+            <div class="card-custom" style="background:rgba(0,212,160,0.05);border-color:rgba(0,212,160,0.15);text-align:center;padding:1.5rem;">
+              <div style="font-size:2.5rem;margin-bottom:0.8rem;">📄</div>
+              <div style="font-weight:700;margin-bottom:0.3rem;">Documentation</div>
+              <div style="font-size:0.8rem;color:var(--text-secondary)">Read Article</div>
+            </div>
+          </a>
+        </div>
+        {% endif %}
+        {% if course.pdf_link %}
+        <div class="col-md-4">
+          <a href="{{ course.pdf_link }}" target="_blank" style="text-decoration:none;">
+            <div class="card-custom" style="background:rgba(255,107,107,0.05);border-color:rgba(255,107,107,0.15);text-align:center;padding:1.5rem;">
+              <div style="font-size:2.5rem;margin-bottom:0.8rem;">📑</div>
+              <div style="font-weight:700;margin-bottom:0.3rem;">PDF Material</div>
+              <div style="font-size:0.8rem;color:var(--text-secondary)">Download PDF</div>
+            </div>
+          </a>
+        </div>
+        {% endif %}
+        {% if not course.video_link and not course.article_link and not course.pdf_link %}
+          <div class="col-12"><p style="color:var(--text-secondary)">No resources linked for this course yet.</p></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><div class="container"><p class="gradient-text"><strong>SmartLearn</strong></p></div></footer>
+{% endblock %}

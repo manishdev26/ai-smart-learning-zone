@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+{% block body %}
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a href="{{ url_for('index') }}" class="sidebar-brand"><i class="fas fa-brain me-2"></i>SmartLearn</a>
+    <div class="sidebar-section-title">Admin</div>
+    <a href="{{ url_for('admin_panel') }}" class="sidebar-link active"><span class="sidebar-icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+    <a href="{{ url_for('admin_add_course') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-plus-circle"></i></span> Add Course</a>
+    <div class="sidebar-section-title">User</div>
+    <a href="{{ url_for('dashboard') }}" class="sidebar-link"><span class="sidebar-icon"><i class="fas fa-user"></i></span> My Dashboard</a>
+    <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border);">
+      <a href="{{ url_for('logout') }}" class="sidebar-link" style="color:var(--accent)"><span class="sidebar-icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </div>
+  </aside>
+  <main class="main-content fade-in">
+    <div class="page-header d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="page-title">🛡️ Admin Panel</h1>
+        <p class="page-sub">Manage courses and view registered users</p>
+      </div>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num">{{ users|length }}</div>
+          <div class="stat-label">Registered Users</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-num">{{ courses|length }}</div>
+          <div class="stat-label">Total Courses</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Courses Table -->
+    <div class="card-custom mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 style="font-weight:700;margin:0"><i class="fas fa-book me-2" style="color:var(--primary)"></i>Courses</h5>
+        <a href="{{ url_for('admin_add_course') }}" class="btn-primary-custom" style="font-size:0.82rem;padding:0.4rem 1rem;">
+          <i class="fas fa-plus me-1"></i>Add Course
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Difficulty</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for course in courses %}
+            <tr>
+              <td>{{ course.id }}</td>
+              <td>
+                <a href="{{ url_for('course_detail', course_id=course.id) }}" style="color:var(--primary-light);text-decoration:none;font-weight:600;">
+                  {{ course.title }}
+                </a>
+              </td>
+              <td><span class="course-badge badge-{{ course.category|lower }}">{{ course.category }}</span></td>
+              <td><span class="course-badge diff-{{ course.difficulty|lower }}">{{ course.difficulty }}</span></td>
+              <td>
+                <a href="{{ url_for('admin_edit_course', course_id=course.id) }}" style="color:var(--secondary);font-size:0.82rem;font-weight:600;text-decoration:none;margin-right:0.8rem;">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="POST" action="{{ url_for('admin_delete_course', course_id=course.id) }}" style="display:inline;" onsubmit="return confirm('Delete this course?')">
+                  <button type="submit" style="background:none;border:none;color:var(--accent);font-size:0.82rem;font-weight:600;cursor:pointer;padding:0;">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card-custom">
+      <h5 style="font-weight:700;margin-bottom:1.2rem"><i class="fas fa-users me-2" style="color:var(--secondary)"></i>Registered Users</h5>
+      <div style="overflow-x:auto;">
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Education</th>
+              <th>Skill Level</th>
+              <th>Interests</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td style="font-weight:600">{{ user.name }}</td>
+              <td style="color:var(--text-secondary)">{{ user.email }}</td>
+              <td>{{ user.education }}</td>
+              <td><span class="course-badge diff-{{ user.skill_level|lower }}">{{ user.skill_level }}</span></td>
+              <td style="font-size:0.8rem;color:var(--text-secondary)">{{ user.interests[:30] }}{% if user.interests|length > 30 %}...{% endif %}</td>
+              <td style="font-size:0.8rem;color:var(--text-secondary)">{{ user.created_at[:10] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
